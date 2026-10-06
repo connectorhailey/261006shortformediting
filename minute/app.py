@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 ROOT=Path(__file__).parent
 DATA=Path(os.environ.get('MINUTE_DATA',str(ROOT/'data'))).resolve(); DATA.mkdir(parents=True,exist_ok=True)
-MAX_BYTES=500*1024*1024
+MAX_BYTES=2*1024**3
 ORIGIN=os.environ.get('PUBLIC_ORIGIN','http://localhost:8000')
 @contextmanager
 def db():
@@ -95,7 +95,7 @@ def projects(request:Request):
 @app.post('/api/projects')
 async def upload(request:Request):
  uid=user(request); limit('upload:'+uid,5,86400)
- if shutil.disk_usage(DATA).free<2*1024**3: raise HTTPException(503,'저장 공간이 부족합니다. 나중에 다시 시도하세요.')
+ if shutil.disk_usage(DATA).free<MAX_BYTES+2*1024**3: raise HTTPException(503,'저장 공간이 부족합니다. 나중에 다시 시도하세요.')
  name=request.headers.get('x-filename','video.mp4'); name=__import__('urllib.parse',fromlist=['unquote']).unquote(name)
  if Path(name).suffix.lower() not in ('.mp4','.mov','.webm'): raise HTTPException(415,'MP4, MOV, WebM 파일만 지원합니다.')
  with db() as c:
@@ -107,7 +107,7 @@ async def upload(request:Request):
   with (folder/'source').open('wb') as f:
    async for chunk in request.stream():
     size+=len(chunk)
-    if size>MAX_BYTES: raise HTTPException(413,'최대 용량은 500MB입니다.')
+    if size>MAX_BYTES: raise HTTPException(413,'최대 용량은 2GB입니다.')
     f.write(chunk)
   seconds_text=request.headers.get('x-seconds','60')
   seconds=int(seconds_text) if seconds_text in ('30','60','90') else 60
