@@ -1,0 +1,27 @@
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:?Set HTTPS public origin}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+    volumes: [minute-data:/data]
+    ports: ["127.0.0.1:8000:8000"]
+    mem_limit: 512m
+    cpus: 1
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+  worker:
+    build: .
+    command: [python, worker.py]
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      HIGHLIGHT_MODEL: ${HIGHLIGHT_MODEL:-gpt-4o-mini}
+    volumes: [minute-data:/data]
+    mem_limit: 4g
+    cpus: 2
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+volumes:
+  minute-data:

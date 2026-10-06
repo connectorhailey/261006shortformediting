@@ -1,0 +1,7 @@
+data/
+.env
+__pycache__/
+.pytest_cache/
+*.mp4
+*.mp3
+*.log
