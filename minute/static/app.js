@@ -34,7 +34,7 @@ $('render').onclick=async()=>{try{const e=editValue();await api('/projects/'+cur
 $('analyze').onclick=async()=>{try{await api('/projects/'+current.id+'/analyze?seconds='+seconds,{method:'POST'});dirty=false;current.state='analyzing';renderStatus()}catch(e){failure(e)}};
 $('delete').onclick=async()=>{if(!confirm('원본 영상과 결과를 영구 삭제할까요?'))return;try{await api('/projects/'+current.id,{method:'DELETE'});current=null;await list()}catch(e){failure(e)}};
 window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue=''}});
-(async()=>{try{cap=await api('/capabilities');capText();try{account=await api('/me');$('account').textContent='로그아웃'}catch{}const id=location.hash.match(/^#project=([a-f0-9]{32})$/)?.[1];if(id&&account)await openProject(id);else if(location.hash==='#projects'&&account)await list()}catch(e){$('capNotice').textContent=config.backendConfigured?'영상 처리 서버에 연결할 수 없습니다. 새로고침해서 다시 시도하세요.':'영상 처리 서버 미연결 · 서버 연결 후 로그인, 업로드와 영상 생성을 이용할 수 있습니다.';failure(e)}})();
+(async()=>{try{cap=await api('/capabilities');capText();try{account=await api('/me');$('account').textContent='로그아웃'}catch{}const id=location.hash.match(/^#project=([a-f0-9]{32})$/)?.[1];if(id&&account)await openProject(id);else if(location.hash==='#projects'&&account)await list()}catch(e){$('capNotice').textContent=config.backendConfigured?'영상 처리 서버에 연결할 수 없습니다. 새로고침해서 다시 시도하세요.':'영상 처리 서버 미연결 · 위의 자막 상담은 바로 이용할 수 있습니다. 영상 업로드·생성은 서버 연결이 필요합니다.';if(config.backendConfigured)failure(e)}})();
 
 $('exactPreview').onclick=async()=>{try{const e=editValue();await api('/projects/'+current.id+'/preview',{method:'POST',body:JSON.stringify(e)});current.edit=e;current.state='previewing';dirty=false;renderStatus()}catch(e){failure(e)}};
 

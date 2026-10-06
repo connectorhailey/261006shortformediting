@@ -103,3 +103,7 @@ python tests/test_flow.py
 배포 시 웹 화면뿐 아니라 FastAPI 서버도 새 `advisor.py`가 포함된 버전으로 업데이트해야 합니다. 서버의 외부 HTTPS 연결에서 `generativelanguage.googleapis.com`을 허용하세요. Vercel 정적 배포만으로 이 서버 API가 실행되지는 않습니다.
 
 공식 문서: https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite · https://ai.google.dev/api/generate-content
+
+### 첫 화면의 독립 상담 추가
+
+프로젝트 편집 화면의 상담 외에 첫 화면에도 키 입력 및 자막 상담이 추가되었습니다. 이 경로는 로그인·영상 서버를 사용하지 않고 루트 `api/consult.mjs`(Vercel) 또는 `netlify/functions/consult.mjs`(Netlify)로 요청합니다. Python 서버만 실행한 로컬 환경에서는 이 새 경로가 제공되지 않습니다. 기존 프로젝트 상담은 계속 FastAPI의 인증된 `/api/projects/{pid}/consult`를 사용합니다. 구체적인 배포 방법과 제한은 루트 README의 `첫 화면에서 바로 Gemini 상담`을 참고하세요.

@@ -182,7 +182,7 @@ class Consultation(BaseModel):
 async def consultation(pid:str,body:Consultation,request:Request):
  uid=user(request); p=project(pid,uid); validate_edit(body.edit,p)
  key=request.headers.get('x-gemini-key','').strip()
- if not key or len(key)>200 or not re.fullmatch(r'[A-Za-z0-9_-]+',key):
+ if not key or len(key)>200 or not re.fullmatch(r'[A-Za-z0-9_.-]+',key):
   raise HTTPException(400,'Gemini API 키를 입력하세요.')
  limit('consult:'+uid,20)
  return await consult(key,body.edit.model_dump(),p['duration'],body.question,body.history)
