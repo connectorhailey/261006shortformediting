@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 
 ROOT=Path(__file__).parent
 DATA=Path(os.environ.get('MINUTE_DATA',str(ROOT/'data'))).resolve(); DATA.mkdir(parents=True,exist_ok=True)
-MAX_BYTES=2*1024**3
+MAX_BYTES=5*1024**3
 ORIGIN=os.environ.get('PUBLIC_ORIGIN','http://localhost:8000')
 @contextmanager
 def db():
@@ -107,7 +107,7 @@ async def upload(request:Request):
   with (folder/'source').open('wb') as f:
    async for chunk in request.stream():
     size+=len(chunk)
-    if size>MAX_BYTES: raise HTTPException(413,'최대 용량은 2GB입니다.')
+    if size>MAX_BYTES: raise HTTPException(413,'최대 용량은 5GB입니다.')
     f.write(chunk)
   seconds_text=request.headers.get('x-seconds','60')
   seconds=int(seconds_text) if seconds_text in ('30','60','90') else 60
