@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from advisor import consult, Turn
 
 ROOT=Path(__file__).parent
 DATA=Path(os.environ.get('MINUTE_DATA',str(ROOT/'data'))).resolve(); DATA.mkdir(parents=True,exist_ok=True)
@@ -28,7 +29,7 @@ with db() as c:
  CREATE INDEX IF NOT EXISTS rates_key ON rates(key,stamp);
  ''')
 app=FastAPI()
-app.add_middleware(CORSMiddleware,allow_origins=[ORIGIN],allow_credentials=True,allow_methods=['GET','POST','PUT','DELETE'],allow_headers=['Content-Type','X-Filename','X-Seconds','Range'],expose_headers=['Content-Length','Content-Range','Accept-Ranges'])
+app.add_middleware(CORSMiddleware,allow_origins=[ORIGIN],allow_credentials=True,allow_methods=['GET','POST','PUT','DELETE'],allow_headers=['Content-Type','X-Filename','X-Seconds','Range','X-Gemini-Key'],expose_headers=['Content-Length','Content-Range','Accept-Ranges'])
 @app.middleware('http')
 async def guard(request,call_next):
  if request.method not in ('GET','HEAD','OPTIONS') and request.headers.get('origin') not in (None,ORIGIN): return JSONResponse({'detail':'허용되지 않은 요청입니다.'},403)
@@ -173,4 +174,16 @@ def media(pid:str,kind:str,request:Request,download:bool=False):
  path=DATA/pid/('result.mp4' if kind=='result' else 'preview.png' if kind=='preview' else 'source')
  if not path.exists() or (kind=='result' and p['state']!='complete'): raise HTTPException(404)
  return FileResponse(path,filename='minute.mp4' if download else None,media_type='video/mp4' if kind=='result' else 'image/png' if kind=='preview' else 'video/webm' if p['name'].lower().endswith('.webm') else 'video/mp4')
+class Consultation(BaseModel):
+ edit:Edit
+ question:str=Field(default='문장이 중간에 끊기는지, 맥락이 부족한지 확인하고 구간 수정을 제안해주세요.',min_length=1,max_length=1500)
+ history:list[Turn]=Field(default_factory=list,max_length=8)
+@app.post('/api/projects/{pid}/consult')
+async def consultation(pid:str,body:Consultation,request:Request):
+ uid=user(request); p=project(pid,uid); validate_edit(body.edit,p)
+ key=request.headers.get('x-gemini-key','').strip()
+ if not key or len(key)>200 or not re.fullmatch(r'[A-Za-z0-9_-]+',key):
+  raise HTTPException(400,'Gemini API 키를 입력하세요.')
+ limit('consult:'+uid,20)
+ return await consult(key,body.edit.model_dump(),p['duration'],body.question,body.history)
 app.mount('/',StaticFiles(directory=ROOT/'static',html=True),name='static')

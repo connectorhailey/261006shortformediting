@@ -45,3 +45,7 @@ Netlify만으로 Python/FFmpeg 서버, 영구 디스크, 장시간 작업 큐를
 YouTube는 임베드 미리보기만 지원하며 편집용 다운로드로 표시하지 않습니다. 자신의 원본 파일을 업로드해야 합니다.
 
 공식 제한 참고: [Netlify proxy](https://docs.netlify.com/manage/routing/redirects/rewrites-proxies/), [Netlify Functions](https://docs.netlify.com/build/functions/configuration/).
+
+## 사용자 Gemini 키 · 숏폼 상담
+
+편집 화면에서 사용자 API 키 입력 → 데이터 전송/과금 안내 확인 → `완성도 점검 · 상담하기`를 누릅니다. **gemini-3.5-flash-lite**가 자막 기준으로 문장 끊김·맥락 누락을 검토하고 구간 수정을 제안합니다. 키는 저장하지 않으며 제안은 사용자 확인 후 적용합니다. 자막이 필요하고, 영상/음성 자체의 검사는 아닙니다. [연결·검증·보안 상세](minute/README.md#gemini-숏폼-완성도-상담원)를 참고하세요. 웹과 별도 FastAPI 서버를 모두 업데이트해야 합니다.
